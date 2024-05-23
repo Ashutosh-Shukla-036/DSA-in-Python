@@ -7,7 +7,7 @@ def misssingNumber(arr):
     for i in range(len(arr)):
         hash[arr[i]] = 1
 
-    for i in range(1,n+1):
+    for i in range(1,n):
         if(hash[i] == 0):
             return i
         
