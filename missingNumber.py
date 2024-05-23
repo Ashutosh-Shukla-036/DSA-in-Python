@@ -1,4 +1,7 @@
-def misssingNumber(arr):
+#Finding the missing numberin the array.
+
+#using Hashing Concept
+def MissingNumber(arr):
 
     n = len(arr)+1
 
@@ -13,6 +16,18 @@ def misssingNumber(arr):
         
     return -1
 
-nums = [1,2,4,3,5,9,0,8,6]
+num = [1,2,4,5]
+print(MissingNumber(num))
 
-print(misssingNumber(nums))
+#optimal solution
+
+def missingnumberInArray(arr):
+    n = len(arr) + 1
+    sum = ( n * (n+1) ) // 2
+    sum2 = 0
+    for i in range(n-1):
+        sum2 = sum2 + arr[i]
+    return sum - sum2
+
+nums = [1,2,3,5]
+print(missingnumberInArray(nums))
