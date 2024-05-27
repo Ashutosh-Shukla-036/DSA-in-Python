@@ -1,5 +1,6 @@
 #Given an integer array nums, find the SUbArray with the largest sum, and return its sum
 
+#using hashmap method in which we take all the subarray and store there sum in hashmap
 def SubArray(arr):
     hashmap = {}
     n = len(arr)
@@ -18,7 +19,9 @@ def SubArray(arr):
 
 nums = [-2,1,-3,4,-1,2,1,-5,4]
 print(SubArray(nums))
+#time Complexity of O(N*N)
 
+#Optimal solution using Kadane's Algorithm.
 import sys
 def MaxSubArray(arr):
     maxi = -sys.maxsize - 1
@@ -47,4 +50,6 @@ def MaxSubArray(arr):
 
 
 nums = [-2,1,-3,4,-1,2,1,-5,4]
-MaxSubArray(nums)     
+MaxSubArray(nums)  
+
+#Time complexity of O(2N)
