@@ -8,7 +8,7 @@ Input: s = "abcabcbb"
 Output: 3
 Explanation: The answer is "abc", with the length of 3.
 """
-
+# Time complexity is O(2n)
 def SubString(s):
     n = len(s)
 
@@ -31,3 +31,19 @@ def SubString(s):
 
 s = "abcabcbb"
 print(SubString(s))
+
+#Optimal solution using hashmap and sliding window
+def String(s):
+    hashmap , maxLen = {} , 0
+    i , j = 0 , 0
+
+    for j in range(len(s)):
+        
+        if s[j] in hashmap and i <= hashmap[s[j]]:
+            i = hashmap[s[j]] + 1
+        hashmap[s[j]] = j
+        maxLen = max(maxLen,j-i+1)
+    return maxLen
+
+s = "abcabcbb"
+print(String(s))
