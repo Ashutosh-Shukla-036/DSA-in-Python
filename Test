@@ -1,0 +1,58 @@
+// ======================= app.js =======================
+const axios = require("axios");
+const express = require("express");
+const app = express();
+app.use(express.json());
+
+/**
+ * Reusable Log Function
+ */
+async function Log(stack, level, pkg, message) {
+  const logPayload = {
+    timestamp: new Date().toISOString(),
+    stack,
+    level,
+    package: pkg,
+    message,
+  };
+
+  try {
+    // Send log to test server
+    await axios.post("http://localhost:4000/logs", logPayload);
+    // Print locally too
+    console.log(`[${level}] (${pkg}) -> ${message}`);
+  } catch (err) {
+    console.error("Failed to send log:", err.message);
+  }
+}
+
+// Middleware logs
+app.use(async (req, res, next) => {
+  await Log("RequestMiddleware", "INFO", "API", `${req.method} ${req.url} called`);
+  next();
+});
+
+// Sample route
+app.get("/users", async (req, res) => {
+  try {
+    await Log("UserController", "DEBUG", "UserModule", "Fetching users...");
+    const users = [{ id: 1, name: "Ashutosh" }, { id: 2, name: "Shukla" }];
+    await Log("UserController", "INFO", "UserModule", `Fetched ${users.length} users`);
+    res.json(users);
+  } catch (err) {
+    await Log("UserController", "ERROR", "UserModule", err.message);
+    res.status(500).send("Error");
+  }
+});
+
+// Global error handler
+app.use(async (err, req, res, next) => {
+  await Log("GlobalErrorHandler", "ERROR", "App", err.message);
+  res.status(500).send("Something went wrong");
+});
+
+// Start server
+app.listen(3000, async () => {
+  await Log("ServerStartup", "INFO", "App", "Server started on port 3000");
+  console.log("🚀 Running on http://localhost:3000");
+});
