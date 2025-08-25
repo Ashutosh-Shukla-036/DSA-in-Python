@@ -12,7 +12,7 @@ async function Log(stack, level, pkg, message) {
 
   try {
     const response = await axios.post("http://localhost:4000/logs", logPayload);
-    console.log("Log response:", response.data); // also print response
+    console.log("Log response:", response.data);
     return response.data;
   } catch (err) {
     console.error("Failed to send log:", err.message);
@@ -23,28 +23,22 @@ async function Log(stack, level, pkg, message) {
 /**
  * ======================= Service =======================
  */
-async function getUsersService() {
-  try {
-    await Log("UserService", "debug", "UserModule", "Querying DB for users...");
-    // Simulated DB call
-    return [{ id: 1, name: "Ashutosh" }, { id: 2, name: "Shukla" }];
-  } catch (err) {
-    await Log("UserService", "error", "UserModule", "DB query failed");
-    throw err;
-  }
+async function sampleService() {
+  await Log("SampleService", "debug", "DemoModule", "Executing service logic...");
+  return { status: "ok" };
 }
 
 /**
  * ======================= Controller =======================
  */
-async function getAllUsersController(req, res) {
+async function sampleController(req, res) {
   try {
-    await Log("UserController", "debug", "UserModule", "Fetching users...");
-    const users = await getUsersService();
-    await Log("UserController", "info", "UserModule", `Fetched ${users.length} users`);
-    res.json(users);
+    await Log("SampleController", "info", "DemoModule", "Handling /test route");
+    const result = await sampleService();
+    await Log("SampleController", "info", "DemoModule", "Service executed successfully");
+    res.json(result);
   } catch (err) {
-    await Log("UserController", "error", "UserModule", err.message);
+    await Log("SampleController", "error", "DemoModule", err.message);
     res.status(500).send("Error");
   }
 }
@@ -60,7 +54,7 @@ app.use(async (req, res, next) => {
 /**
  * ======================= Routes =======================
  */
-app.get("/users", getAllUsersController);
+app.get("/test", sampleController);
 
 /**
  * ======================= Error Handler =======================
