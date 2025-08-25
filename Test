@@ -1,58 +1,79 @@
 // ======================= app.js =======================
-const axios = require("axios");
 const express = require("express");
+const axios = require("axios");
 const app = express();
 app.use(express.json());
 
 /**
- * Reusable Log Function
+ * ======================= Logger =======================
  */
 async function Log(stack, level, pkg, message) {
-  const logPayload = {
-    timestamp: new Date().toISOString(),
-    stack,
-    level,
-    package: pkg,
-    message,
-  };
+  const logPayload = { stack, level, package: pkg, message };
 
   try {
-    // Send log to test server
-    await axios.post("http://localhost:4000/logs", logPayload);
-    // Print locally too
-    console.log(`[${level}] (${pkg}) -> ${message}`);
+    const response = await axios.post("http://localhost:4000/logs", logPayload);
+    console.log("Log response:", response.data); // also print response
+    return response.data;
   } catch (err) {
     console.error("Failed to send log:", err.message);
+    throw err;
   }
 }
 
-// Middleware logs
+/**
+ * ======================= Service =======================
+ */
+async function getUsersService() {
+  try {
+    await Log("UserService", "debug", "UserModule", "Querying DB for users...");
+    // Simulated DB call
+    return [{ id: 1, name: "Ashutosh" }, { id: 2, name: "Shukla" }];
+  } catch (err) {
+    await Log("UserService", "error", "UserModule", "DB query failed");
+    throw err;
+  }
+}
+
+/**
+ * ======================= Controller =======================
+ */
+async function getAllUsersController(req, res) {
+  try {
+    await Log("UserController", "debug", "UserModule", "Fetching users...");
+    const users = await getUsersService();
+    await Log("UserController", "info", "UserModule", `Fetched ${users.length} users`);
+    res.json(users);
+  } catch (err) {
+    await Log("UserController", "error", "UserModule", err.message);
+    res.status(500).send("Error");
+  }
+}
+
+/**
+ * ======================= Middleware =======================
+ */
 app.use(async (req, res, next) => {
-  await Log("RequestMiddleware", "INFO", "API", `${req.method} ${req.url} called`);
+  await Log("RequestMiddleware", "info", "API", `${req.method} ${req.url} called`);
   next();
 });
 
-// Sample route
-app.get("/users", async (req, res) => {
-  try {
-    await Log("UserController", "DEBUG", "UserModule", "Fetching users...");
-    const users = [{ id: 1, name: "Ashutosh" }, { id: 2, name: "Shukla" }];
-    await Log("UserController", "INFO", "UserModule", `Fetched ${users.length} users`);
-    res.json(users);
-  } catch (err) {
-    await Log("UserController", "ERROR", "UserModule", err.message);
-    res.status(500).send("Error");
-  }
-});
+/**
+ * ======================= Routes =======================
+ */
+app.get("/users", getAllUsersController);
 
-// Global error handler
+/**
+ * ======================= Error Handler =======================
+ */
 app.use(async (err, req, res, next) => {
-  await Log("GlobalErrorHandler", "ERROR", "App", err.message);
+  await Log("GlobalErrorHandler", "error", "App", err.message);
   res.status(500).send("Something went wrong");
 });
 
-// Start server
+/**
+ * ======================= Start Server =======================
+ */
 app.listen(3000, async () => {
-  await Log("ServerStartup", "INFO", "App", "Server started on port 3000");
+  await Log("ServerStartup", "info", "App", "Server started on port 3000");
   console.log("🚀 Running on http://localhost:3000");
 });
